@@ -1,0 +1,8 @@
+prefix=/home/viki/catkin_ws/devel
+
+Name: professor_mundo
+Description: Description of professor_mundo
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

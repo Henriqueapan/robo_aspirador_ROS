@@ -1,0 +1,20 @@
+#!/usr/bin/env python
+
+from __future__ import print_function
+
+import sys
+import rospy
+from beginner_tutorials.srv import *
+
+def iluminacao_client():
+    rospy.wait_for_service('iluminacao_server')
+    try:
+        canal_server = rospy.ServiceProxy('iluminacao_server', ControleIluminacao)
+        comando = input("Digite o comando de controle de iluminação: ")
+        resp = canal_server(comando)
+        print(resp.resposta)
+    except rospy.ServiceException as e:
+        print("Service call failed: %s"%e)
+
+if __name__ == "__main__":
+    iluminacao_client()
