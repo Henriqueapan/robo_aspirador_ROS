@@ -1,0 +1,19 @@
+version: "3.9"
+
+services:
+  ros-gazebo:
+    image: ros-gazebo
+    container_name: ros_gazebo
+    network_mode: "host"       # necessário para ROS + Gazebo
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+    volumes:
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./src:/root/catkin_ws/src:rw
+      - ./build:/root/catkin_ws/build:rw
+    stdin_open: true
+    tty: true
+    devices:
+      - /dev/dri
+    command: bash

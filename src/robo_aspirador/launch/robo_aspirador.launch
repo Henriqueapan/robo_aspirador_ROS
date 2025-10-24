@@ -1,0 +1,29 @@
+<launch>
+  <!-- Inicia Gazebo com um mundo vazio -->
+  <arg name="world_name" default="empty"/>
+  <arg name="paused" default="false"/>
+  <arg name="use_sim_time" default="true"/>
+
+  <include file="$(find gazebo_ros)/launch/empty_world.launch">
+    <arg name="world_name" value="$(arg world_name)"/>
+    <arg name="paused" value="$(arg paused)"/>
+    <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+  </include>
+
+  <!-- Carrega a descrição do robô no ROS Parameter Server antes de spawná-lo -->
+  <param name="/robot_description" command="$(find xacro)/xacro --inorder $(find p3dx_description)/urdf/pioneer3dx.xacro"/>
+
+  <!-- Spawna o robô no mundo -->
+  <include file="$(find p3dx_gazebo)/launch/spawn.launch">
+    <arg name="name" value="p3dx" />
+    <arg name="namespace_arg" value="p3dx" />
+    <arg name="x" value="0" />
+    <arg name="y" value="0" />
+    <arg name="z" value="0" />
+  </include>
+
+  <!-- Spawna sua casa original -->
+  <node name="spawn_casa" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
+        args="-file $(find robo_aspirador)/worlds/casa/model.sdf -sdf -model casa -x 0 -y 0 -z 0" />
+
+</launch>

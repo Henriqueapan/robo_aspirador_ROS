@@ -1,0 +1,25 @@
+<launch>  
+  <!-- Argumentos -->
+  <arg name="velocidade_linear_max" default="1.0" doc="Velocidade máxima linear do robô"/>
+  <arg name="velocidade_angular_max" default="1.0" doc="Velocidade máxima angular do robô"/>
+  <arg name="modo_debug" default="false" doc="Ativar modo debug"/>
+  
+  <!-- Inicia o simulador com o robô na casa -->
+  <include file="$(find robo_aspirador)/launch/robo_aspirador.launch"/>
+  
+  <!-- Aguarda o Gazebo inicializar -->
+  <node pkg="rospy_tutorials" type="sleep" name="wait_for_gazebo" args="5"/>
+  
+  <!-- Nó de controle manual por teclado -->
+  <node name="robo_aspirador_teleop" pkg="robo_aspirador" type="robo_aspirador_keyteleop.py" output="screen">
+    <param name="velocidade_linear_max" value="$(arg velocidade_linear_max)"/>
+    <param name="velocidade_angular_max" value="$(arg velocidade_angular_max)"/>
+    <param name="modo_debug" value="$(arg modo_debug)"/>
+  </node>
+  
+  
+  <node name="info_node" pkg="rospy_tutorials" type="talker" output="screen" if="$(arg modo_debug)">
+    <remap from="chatter" to="/debug_info"/>
+  </node>
+  
+</launch>

@@ -1,0 +1,13 @@
+<launch>
+  <!-- Launch file para testar o controle do robô -->
+  
+  <!-- Inicia o mundo com o robô -->
+  <include file="$(find robo_aspirador)/launch/robo_aspirador.launch"/>
+  
+  <!-- Aguarda um pouco para o mundo carregar -->
+  <node pkg="rospy_tutorials" type="sleep" name="wait_for_gazebo" args="5"/>
+  
+  <!-- Executa o teste de controle -->
+  <node pkg="robo_aspirador" type="test_robot_control.py" name="test_robot_control" output="screen"/>
+  
+</launch>
