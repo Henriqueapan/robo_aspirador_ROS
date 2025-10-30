@@ -2,6 +2,7 @@ version: "3.9"
 
 services:
   ros-gazebo:
+    build: .
     image: ros-gazebo
     container_name: ros_gazebo
     network_mode: "host"       # necessário para ROS + Gazebo

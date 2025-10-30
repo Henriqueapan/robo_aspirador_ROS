@@ -3,6 +3,10 @@
   <arg name="world_name" default="empty"/>
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
+  <!-- Configuração do SLAM GMapping -->
+  <arg name="scan_topic" default="/p3dx/laser/scan"/>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="odom_frame" default="odom"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(arg world_name)"/>
@@ -13,7 +17,7 @@
   <!-- Carrega a descrição do robô no ROS Parameter Server antes de spawná-lo -->
   <param name="/robot_description" command="$(find xacro)/xacro --inorder $(find p3dx_description)/urdf/pioneer3dx.xacro"/>
 
-  <!-- Spawna o robô no mundo -->
+  <!-- Spawna o Diego Baratona no mundo -->
   <include file="$(find p3dx_gazebo)/launch/spawn.launch">
     <arg name="name" value="p3dx" />
     <arg name="namespace_arg" value="p3dx" />
@@ -22,8 +26,28 @@
     <arg name="z" value="0" />
   </include>
 
-  <!-- Spawna sua casa original -->
+  <!-- Spawna a casa -->
   <node name="spawn_casa" pkg="gazebo_ros" type="spawn_model" respawn="false" output="screen"
         args="-file $(find robo_aspirador)/worlds/casa/model.sdf -sdf -model casa -x 0 -y 0 -z 0" />
+
+  <!-- SLAM GMapping: lê LaserScan e odometria (via TF odom->base) -->
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="screen">
+    <!-- Remapeia o tópico de LaserScan para o usado pelo robô -->
+    <remap from="scan" to="$(arg scan_topic)"/>
+
+    <!-- Frames para ler a odometria via TF -->
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+
+    <!-- Parâmetros básicos (ajuste conforme necessário) -->
+    <param name="map_update_interval" value="2.0"/>
+    <param name="linearUpdate" value="0.2"/>
+    <param name="angularUpdate" value="0.2"/>
+    <param name="maxUrange" value="8.0"/>
+    <param name="maxRange" value="12.0"/>
+    <param name="sigma" value="0.05"/>
+    <param name="lsigma" value="0.075"/>
+    <param name="occ_thresh" value="0.25"/>
+  </node>
 
 </launch>
