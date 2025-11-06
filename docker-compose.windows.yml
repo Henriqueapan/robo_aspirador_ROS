@@ -1,0 +1,39 @@
+version: "3.9"
+
+services:
+  ros-gazebo:
+    build: .
+    image: ros-gazebo
+    container_name: ros_gazebo
+    # No Windows, network_mode: "host" não funciona
+    # Usamos portas mapeadas ao invés disso
+    ports:
+      - "11311:11311"  # ROS master
+      - "11312:11312"  # ROS parameter server
+    environment:
+      - DISPLAY=${DISPLAY}
+      - QT_X11_NO_MITSHM=1
+      # Para GPU NVIDIA no Windows via WSL2
+      - NVIDIA_VISIBLE_DEVICES=all
+      - NVIDIA_DRIVER_CAPABILITIES=all
+    volumes:
+      # No Windows, montamos o diretório do WSL2 para X11
+      # Isso requer que você tenha um X server rodando (VcXsrv/Xming)
+      - //wsl.localhost/Ubuntu/tmp/.X11-unix:/tmp/.X11-unix:rw
+      - ./src:/root/catkin_ws/src:rw
+      - ./build:/root/catkin_ws/build:rw
+    stdin_open: true
+    tty: true
+    # Para GPU NVIDIA no Windows via WSL2
+    # Descomente as linhas abaixo se tiver GPU NVIDIA e Docker configurado
+    # deploy:
+    #   resources:
+    #     reservations:
+    #       devices:
+    #         - driver: nvidia
+    #           count: all
+    #           capabilities: [gpu]
+    # Alternativa: use runtime nvidia diretamente (requer configuração no Docker Desktop)
+    # runtime: nvidia
+    command: bash
+
