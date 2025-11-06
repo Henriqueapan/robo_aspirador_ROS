@@ -11,7 +11,7 @@ services:
       - "11311:11311"  # ROS master
       - "11312:11312"  # ROS parameter server
     environment:
-      - DISPLAY=${DISPLAY}
+      - DISPLAY=host.docker.internal:0.0
       - QT_X11_NO_MITSHM=1
       # Para GPU NVIDIA no Windows via WSL2
       - NVIDIA_VISIBLE_DEVICES=all
