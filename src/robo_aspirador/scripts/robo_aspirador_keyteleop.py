@@ -112,10 +112,10 @@ class RoboAspiradorTeleop:
         """Loop principal de controle"""
         speed = 0
         turn = 0
-        status = 0
         
         try:
             print(self.msg)
+            print("\n\n")
             print(self.vels(speed, turn))
             
             while not rospy.is_shutdown():
@@ -142,11 +142,11 @@ class RoboAspiradorTeleop:
                 elif key == 'r': # Aumenta velocidade
                     self.velocidade_linear = min(self.velocidade_linear_max, self.velocidade_linear + 0.1)
                     self.velocidade_angular = min(self.velocidade_angular_max, self.velocidade_angular + 0.1)
-                    rospy.loginfo(f"Velocidade aumentada: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}")
+                    rospy.loginfo(f"\n\n\rVelocidade aumentada: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}")
                 elif key == 'f': #Diminui velocidade
                     self.velocidade_linear = max(self.velocidade_min, self.velocidade_linear - 0.1)
                     self.velocidade_angular = max(self.velocidade_min, self.velocidade_angular - 0.1)
-                    rospy.loginfo(f"Velocidade diminuída: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}")
+                    rospy.loginfo(f"\n\n\rVelocidade diminuída: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}")
                 
                 # Modos especiais
                 elif key == 'q':
@@ -166,20 +166,20 @@ class RoboAspiradorTeleop:
                 
                 # Atualiza status
                 if key != '' and key not in ['r', 'f', 'q', 'e']:
-                    print(f"\r{self.vels(speed, turn)}", end='', flush=True)
+                    print(f"\n\n\r{self.vels(speed, turn)}", end='', flush=True)
                 
         except Exception as e:
-            print(f"\nErro: {e}")
+            print(f"\n\n\rErro: {e}")
         finally:
             # Para o robô
             twist = Twist()
             self.pub.publish(twist)
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
-            print("\nRobô parado. Programa encerrado.")
+            print("\n\n\rRobô parado. Programa encerrado.")
 
 if __name__ == '__main__':
     try:
         teleop = RoboAspiradorTeleop()
         teleop.run()
     except rospy.ROSInterruptException:
-        print("\nPrograma interrompido pelo usuário.")
+        print("\n\n\rPrograma interrompido pelo usuário.")
