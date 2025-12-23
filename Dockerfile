@@ -17,7 +17,6 @@ RUN apt-get update && apt-get install -y \
     net-tools \
     iputils-ping \
     ros-noetic-slam-gmapping \
-    ros-noetic-openslam-gmapping \
     && rm -rf /var/lib/apt/lists/*
 
 # Instala dependências Python se quiser
