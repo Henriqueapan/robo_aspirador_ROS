@@ -1,0 +1,10 @@
+# Garante que arquivos Python e scripts usem LF (Unix) em vez de CRLF (Windows), uma vez que a imagem base para o container é Linux.
+*.py text eol=lf
+*.sh text eol=lf
+*.launch text eol=lf
+*.xml text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+

@@ -1,13 +1,15 @@
 <launch>
-  <!-- Inicia Gazebo com um mundo vazio -->
+  <!-- Argumentos -->
   <arg name="world_name" default="empty"/>
   <arg name="paused" default="false"/>
   <arg name="use_sim_time" default="true"/>
+  
   <!-- Configuração do SLAM GMapping -->
   <arg name="scan_topic" default="/p3dx/laser/scan"/>
   <arg name="base_frame" default="base_link"/>
   <arg name="odom_frame" default="odom"/>
 
+  <!-- Inicia Gazebo com um mundo vazio -->
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
     <arg name="world_name" value="$(arg world_name)"/>
     <arg name="paused" value="$(arg paused)"/>
@@ -17,7 +19,7 @@
   <!-- Carrega a descrição do robô no ROS Parameter Server antes de spawná-lo -->
   <param name="/robot_description" command="$(find xacro)/xacro --inorder $(find p3dx_description)/urdf/pioneer3dx.xacro"/>
 
-  <!-- Spawna o Diego Baratona no mundo -->
+  <!-- Spawna o robô P3DX no mundo -->
   <include file="$(find p3dx_gazebo)/launch/spawn.launch">
     <arg name="name" value="p3dx" />
     <arg name="namespace_arg" value="p3dx" />
@@ -50,4 +52,14 @@
     <param name="occ_thresh" value="0.25"/>
   </node>
 
+  <!-- Aguarda o Gazebo inicializar -->
+  <node pkg="rospy_tutorials" type="sleep" name="wait_for_gazebo" args="5"/>
+
+  <!-- Converte terminações de linha dos scripts Python (CRLF -> LF) automaticamente -->
+  <node name="fix_line_endings" pkg="robo_aspirador" type="fix_line_endings_node.py" output="log" required="false"/>
+
+  <!-- Nó principal do controlador do robô aspirador -->
+  <node name="robo_aspirador_controller" pkg="robo_aspirador" type="robo_aspirador_controller.py" output="screen" required="true"/>
+
 </launch>
+

@@ -5,14 +5,18 @@ from geometry_msgs.msg import Twist
 import sys, select, termios, tty
 
 class RoboAspiradorTeleop:
-    def __init__(self, velocidade_linear_max = 1.0, velocidade_angular_max = 1.0):
-        rospy.init_node('robo_aspirador_keyteleop')
+    def __init__(self, velocidade_linear_max = 1.0, velocidade_angular_max = 1.0, node_name='robo_aspirador_keyteleop', init_node=True, allow_exit_on_q=False):
+        if init_node:
+            rospy.init_node(node_name)
         
         # Publisher para comandos de velocidade do P3DX
         self.pub = rospy.Publisher('/p3dx/cmd_vel', Twist, queue_size=1)
         
         # Configurações do teclado
         self.settings = termios.tcgetattr(sys.stdin)
+        
+        # Flag para permitir saída com 'q'
+        self.allow_exit_on_q = allow_exit_on_q
         
         # Instruções específicas para o robô aspirador
         self.msg = """
@@ -150,7 +154,10 @@ class RoboAspiradorTeleop:
                 
                 # Modos especiais
                 elif key == 'q':
-                    self.modo_limpeza()
+                    if self.allow_exit_on_q:
+                        break  # Sai do modo quando usado pelo controller
+                    else:
+                        self.modo_limpeza()
                 elif key == 'e':
                     self.voltar_estacao_carga()
                 
