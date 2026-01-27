@@ -1,0 +1,43 @@
+<launch>
+  <!-- SLAM GMapping -->
+  <arg name="scan_topic" default="/p3dx/laser/scan"/>
+  <arg name="base_frame" default="base_link"/>
+  <arg name="odom_frame" default="odom"/>
+
+  <!-- Teleop parameters -->
+  <arg name="velocidade_linear_max" default="1.0"/>
+  <arg name="velocidade_angular_max" default="1.0"/>
+  <arg name="modo_debug" default="false"/>
+  <arg name="teleop_quiet" default="true"/>
+  <arg name="teleop_show_banner" default="true"/>
+  <arg name="teleop_status_rate_hz" default="5.0"/>
+
+  <!-- SLAM GMapping: lê LaserScan e odometria (via TF odom->base) -->
+  <node pkg="gmapping" type="slam_gmapping" name="slam_gmapping" output="log">
+    <remap from="scan" to="$(arg scan_topic)"/>
+    <param name="base_frame" value="$(arg base_frame)"/>
+    <param name="odom_frame" value="$(arg odom_frame)"/>
+    <param name="map_update_interval" value="2.0"/>
+    <param name="linearUpdate" value="0.2"/>
+    <param name="angularUpdate" value="0.2"/>
+    <param name="maxUrange" value="8.0"/>
+    <param name="maxRange" value="12.0"/>
+    <param name="sigma" value="0.05"/>
+    <param name="lsigma" value="0.075"/>
+    <param name="occ_thresh" value="0.25"/>
+  </node>
+
+  <!-- Nó de controle manual por teclado -->
+  <node name="robo_aspirador_teleop" pkg="robo_aspirador" type="robo_aspirador_keyteleop.py" output="screen">
+    <param name="velocidade_linear_max" value="$(arg velocidade_linear_max)"/>
+    <param name="velocidade_angular_max" value="$(arg velocidade_angular_max)"/>
+    <param name="modo_debug" value="$(arg modo_debug)"/>
+    <param name="quiet" value="$(arg teleop_quiet)"/>
+    <param name="show_banner" value="$(arg teleop_show_banner)"/>
+    <param name="status_rate_hz" value="$(arg teleop_status_rate_hz)"/>
+  </node>
+
+  <node name="info_node" pkg="rospy_tutorials" type="talker" output="log" if="$(arg modo_debug)">
+    <remap from="chatter" to="/debug_info"/>
+  </node>
+</launch>
