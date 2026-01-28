@@ -36,6 +36,11 @@ class RoboAspiradorTeleop:
         
         CTRL-C para sair
         """
+
+        self.show_banner = rospy.get_param("~show_banner", True)
+        self.quiet = rospy.get_param("~quiet", False)
+        self.status_rate_hz = float(rospy.get_param("~status_rate_hz", 5.0))
+        self._last_status_time = 0.0
         
         # Configurações de velocidade
         self.velocidade_linear = 0.3
@@ -61,7 +66,8 @@ class RoboAspiradorTeleop:
         Simula modo de limpeza automática.
         Realiza alguns movimentos para simular uma limpeza do ambiente.
         """
-        rospy.loginfo("Iniciando modo de limpeza automática...")
+        if not self.quiet:
+            rospy.loginfo("Iniciando modo de limpeza automática...")
         
         # Padrão de movimento para limpeza
         padroes = [
@@ -80,13 +86,15 @@ class RoboAspiradorTeleop:
             twist.angular.z = angular
             self.pub.publish(twist)
             
-            rospy.loginfo(f"Limpando... Linear: {linear}, Angular: {angular}")
+            if not self.quiet:
+                rospy.loginfo(f"Limpando... Linear: {linear}, Angular: {angular}")
             rospy.sleep(tempo)
         
         # Para o robô
         twist = Twist()
         self.pub.publish(twist)
-        rospy.loginfo("Limpeza concluída.")
+        if not self.quiet:
+            rospy.loginfo("Limpeza concluída.")
 
 
     def voltar_estacao_carga(self):
@@ -95,7 +103,8 @@ class RoboAspiradorTeleop:
         Na prática, apenas simula o que seria o movimento de retornar para a estação de carga.
         Não volta de fato para um lugar pré-definido, apenas faz alguns movimentos simulando isso.
         """
-        rospy.loginfo("Voltando à estação de carga...")
+        if not self.quiet:
+            rospy.loginfo("Voltando à estação de carga...")
         
         # Simula movimento de retorno
         twist = Twist()
@@ -106,7 +115,8 @@ class RoboAspiradorTeleop:
         # Para o robô
         twist = Twist()
         self.pub.publish(twist)
-        rospy.loginfo("Chegou ao ponto inicial.")
+        if not self.quiet:
+            rospy.loginfo("Chegou ao ponto inicial.")
     
     def run(self):
         """Loop principal de controle"""
@@ -114,9 +124,11 @@ class RoboAspiradorTeleop:
         turn = 0
         
         try:
-            print(self.msg)
-            print("\n\n")
-            print(self.vels(speed, turn))
+            if self.show_banner and not self.quiet:
+                print(self.msg)
+                print("\n")
+            if not self.quiet:
+                print(self.vels(speed, turn))
             
             while not rospy.is_shutdown():
                 key = self.get_key()
@@ -142,11 +154,17 @@ class RoboAspiradorTeleop:
                 elif key == 'r': # Aumenta velocidade
                     self.velocidade_linear = min(self.velocidade_linear_max, self.velocidade_linear + 0.1)
                     self.velocidade_angular = min(self.velocidade_angular_max, self.velocidade_angular + 0.1)
-                    rospy.loginfo(f"\n\n\rVelocidade aumentada: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}")
+                    if not self.quiet:
+                        rospy.loginfo(
+                            f"Velocidade aumentada: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}"
+                        )
                 elif key == 'f': #Diminui velocidade
                     self.velocidade_linear = max(self.velocidade_min, self.velocidade_linear - 0.1)
                     self.velocidade_angular = max(self.velocidade_min, self.velocidade_angular - 0.1)
-                    rospy.loginfo(f"\n\n\rVelocidade diminuída: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}")
+                    if not self.quiet:
+                        rospy.loginfo(
+                            f"Velocidade diminuída: Linear={self.velocidade_linear:.2f}, Angular={self.velocidade_angular:.2f}"
+                        )
                 
                 # Modos especiais
                 elif key == 'q':
@@ -165,17 +183,23 @@ class RoboAspiradorTeleop:
                 self.pub.publish(twist)
                 
                 # Atualiza status
-                if key != '' and key not in ['r', 'f', 'q', 'e']:
-                    print(f"\n\n\r{self.vels(speed, turn)}", end='', flush=True)
+                if not self.quiet and key != '' and key not in ['r', 'f', 'q', 'e']:
+                    now = rospy.get_time()
+                    if now - self._last_status_time >= (1.0 / self.status_rate_hz):
+                        sys.stdout.write("\r" + self.vels(speed, turn) + " " * 5)
+                        sys.stdout.flush()
+                        self._last_status_time = now
                 
         except Exception as e:
-            print(f"\n\n\rErro: {e}")
+            if not self.quiet:
+                print(f"\n\rErro: {e}")
         finally:
             # Para o robô
             twist = Twist()
             self.pub.publish(twist)
             termios.tcsetattr(sys.stdin, termios.TCSADRAIN, self.settings)
-            print("\n\n\rRobô parado. Programa encerrado.")
+            if not self.quiet:
+                print("\n\rRobô parado. Programa encerrado.")
 
 if __name__ == '__main__':
     try:
